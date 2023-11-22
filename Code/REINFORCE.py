@@ -1,10 +1,10 @@
-import gym
 import torch
 import torch.nn.functional as F
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 from Refuel_Env import *
+from MAXQ import RefuelEnv
 
 class PGNet(torch.nn.Module):
     def __init__(self, state_dim, hidden_dim1, hidden_dim2, hidden_dim3, action_dim):
@@ -56,7 +56,7 @@ class REINFORCE:
 if __name__ == "__main__":
     learning_rate = 1e-3
     num_episodes = 50
-    hidden_dim = 10
+    hidden_dim = 128
     gamma = 0.98
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
@@ -67,7 +67,7 @@ if __name__ == "__main__":
     agent = REINFORCE(state_dim, hidden_dim, hidden_dim, hidden_dim, action_dim, learning_rate, gamma, device)
 
     return_list = []
-    for i in range(100):
+    for i in range(50):
         with tqdm(total=int(num_episodes), desc='Iteration %d' % i) as pbar:
             for i_episode in range(int(num_episodes)):
                 episode_return = 0

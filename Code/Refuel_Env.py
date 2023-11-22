@@ -27,6 +27,12 @@ class Refuel_Model:
 
         return flag
 
+    def execute(self, state, next_state):
+        flag = 0
+        if state[2] + 1 == next_state[2]:
+            flag = 1
+        return flag
+
     # 判断由当前状态进入下一个状态是否符合实际
     def conflict(self, state, next_state):
         flag = 0
@@ -55,8 +61,6 @@ class Refuel_Model:
                 return flag
 
         return flag
-
-
 
     def transform(self, state, action):
         next_state = np.zeros(3)
@@ -94,5 +98,9 @@ class Refuel_Model:
         if flag_find == 1:
             return next_state, 10, True
 
-        return next_state, -3, False
+        flag_execute = self.execute(state, next_state)
+        if flag_execute == 1:
+            return next_state, 10, False
+
+        return next_state, -0.1, False
 
