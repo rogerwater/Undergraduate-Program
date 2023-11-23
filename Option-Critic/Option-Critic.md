@@ -100,7 +100,7 @@ option 内的策略、终止函数和 option 上的策略属于系统的 actor �
 
 Option-critic 架构没有规定如何获得 $\pi_{\Omega}$ ，因为可以应用各种现有方法：在 SMDP 级别使用策略梯度方法，在 options 模型上使用规划器，或者使用时间差分更新。如果 $\pi_{\Omega}$ 是对 options 的贪婪策略，则从（2）式可以得出，相应的一步 off-policy 更新目标 $g^{(1)}_t$ 为：
 $$
-g^{(1)}_t = r_{t+1} + \gamma ((1-\beta_{\omega_t,\vartheta}(s_{t+1}))\sum_a\pi_{\omega_t,\theta}(a|s_{t+1})Q_U(s_{t+1},\omega_t,a) + \\ \beta_{\omega_t,\vartheta}(s_{t+1}) \underset{\omega}{\max})\sum_a\pi_{\omega,\theta}(a|s_{t+1})Q_U(s_{t+1},\omega,a)
+g^{(1)}_t = r_{t+1} + \gamma ((1-\beta_{\omega_t,\vartheta}(s_{t+1}))\sum_a\pi_{\omega_t,\theta}(a|s_{t+1})Q_U(s_{t+1},\omega_t,a) + \\ \beta_{\omega_t,\vartheta}(s_{t+1}) \underset{\omega}{\max}\sum_a\pi_{\omega,\theta}(a|s_{t+1})Q_U(s_{t+1},\omega,a))
 $$
 这也是 option 内 Q-learning 算法的更新目标。算法 1 显示了使用 option 内 Q-learning 的 option-critic 架构实现。我们分别用 $\alpha$ ， $\alpha_{\theta}$ 和 $\alpha_{\vartheta}$ 表示 critic ， option 内策略和终止函数的学习率。
 
