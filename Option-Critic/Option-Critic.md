@@ -4,7 +4,7 @@
 
 时间抽象是强化学习中扩大学习和规划的关键。
 
-我们推导了 options 的策略梯度定理，并提出了一种新的 option-critic 架构，能够与基于 options 的策略一起学习 options 的内部策略和终止条件，，而不需要提供任何额外的奖励或子目标。 
+本文推导了 options 的策略梯度定理，并提出了一种新的 option-critic 架构，能够与基于 options 的策略一起学习 options 的内部策略和终止条件，，而不需要提供任何额外的奖励或子目标。 
 
 ## 2. Introduction
 

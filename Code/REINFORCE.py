@@ -3,8 +3,7 @@ import torch.nn.functional as F
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
-from Refuel_Env import *
-from MAXQ import RefuelEnv
+from Refuel_Env import RefuelEnv
 
 class PGNet(torch.nn.Module):
     def __init__(self, state_dim, hidden_dim1, hidden_dim2, hidden_dim3, action_dim):
