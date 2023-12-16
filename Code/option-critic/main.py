@@ -6,7 +6,8 @@ from copy import deepcopy
 from option_critic import OptionCriticFeatures
 from option_critic import critic_loss as critic_loss_fn
 from option_critic import actor_loss as actor_loss_fn
-from actor_critic import ActorCriticFeatures, PolicyNet, ValueNet
+from actor_critic import ActorCriticFeatures
+
 
 from experience_replay import ReplayBuffer
 from utils import to_tensor
@@ -40,6 +41,7 @@ parser.add_argument('--seed', type=int, default=0, help='Random seed for numpy, 
 parser.add_argument('--logdir', type=str, default='runs', help='Directory for logging statistics')
 parser.add_argument('--exp', type=str, default=None, help='Optional experiment name')
 parser.add_argument('--max_episode', type=int, default=600, help='Number of maximum episodes')
+
 
 def run_option_critic(args):
     env = gym.make(args.env)
@@ -177,7 +179,6 @@ def run_actor_critic(args):
 
     return episode_reward
 
-
 if __name__ == "__main__":
     args = parser.parse_args()
     episode_reward_oc = run_option_critic(args)
@@ -194,3 +195,4 @@ if __name__ == "__main__":
     plt.title("Performance on CartPole")
     plt.legend()
     plt.show()
+
