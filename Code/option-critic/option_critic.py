@@ -7,7 +7,6 @@ import numpy as np
 
 from utils import to_tensor
 
-
 class OptionCriticFeatures(nn.Module):
     def __init__(self, in_features, num_actions, num_options, device,
                  temperature=1.0, eps_start=1.0, eps_min=0.1, eps_decay=int(1e6),
