@@ -179,6 +179,7 @@ def run_actor_critic(args):
 
     return episode_reward
 
+
 if __name__ == "__main__":
     args = parser.parse_args()
     episode_reward_oc = run_option_critic(args)

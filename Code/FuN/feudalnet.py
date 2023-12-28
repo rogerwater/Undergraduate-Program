@@ -60,7 +60,7 @@ class FeudalNet(nn.Module):
             states.pop(0)
 
         goals.append(goal)
-        states.append(state.detach()) # state never have gradients active
+        states.append(state.detach())  # state never have gradients active
 
         # The manager is ahead at least c steps, so we feed only the first c + 1 states to worker
         action_dist, hidden_w, value_w = self.worker(z, goals[:self.c + 1], self.hidden_w, mask)
@@ -119,9 +119,9 @@ class Perception(nn.Module):
 class Manager(nn.Module):
     def __init__(self, c, d, r, args, device):
         super(Manager, self).__init__()
-        self.c = c # Time horizon
-        self.d = d # Hidden dimension size
-        self.r = r # Dilation level
+        self.c = c  # Time horizon
+        self.d = d  # Hidden dimension size
+        self.r = r  # Dilation level
         self.eps = args.eps
         self.device = device
 
@@ -166,7 +166,7 @@ class Worker(nn.Module):
         self.device = device
 
         self.Wrnn = nn.LSTMCell(d, k * self.num_actions)
-        self.phi = nn.Linear(d, k ,bias=False)
+        self.phi = nn.Linear(d, k, bias=False)
         self.critic = nn.Sequential(
             nn.Linear(k * self.num_actions, 50),
             nn.ReLU(),
@@ -209,7 +209,7 @@ def feudal_loss(storage, next_v_m, next_v_w, args):
     ret_m = next_v_m
     ret_w = next_v_w
 
-    storage.placeholder() # Fill ret_m, ret_w with empty vals
+    storage.placeholder()  # Fill ret_m, ret_w with empty vals
     for i in reversed(range(args.num_steps)):
         ret_m = storage.r[i] + args.gamma_m * ret_m * storage.m[i]
         ret_w = storage.r[i] + args.gamma_w * ret_w * storage.m[i]

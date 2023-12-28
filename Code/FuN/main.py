@@ -1,6 +1,5 @@
 import argparse
 
-import gym
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
@@ -8,7 +7,7 @@ import torch
 from utils import make_envs, take_action
 from feudalnet import FeudalNet, feudal_loss
 from storage import Storage
-from logger import Logger
+# from logger import Logger
 
 parser = argparse.ArgumentParser(description='Feudal Networks')
 # Generic RL/Model Parameters
@@ -16,7 +15,7 @@ parser.add_argument('--lr', type=float, default=0.0005,
                     help='learning rate')
 parser.add_argument('--env-name', type=str, default='BreakoutNoFrameskip-v4',
                     help='gym environment name')
-parser.add_argument('--num-workers', type=int, default=16,
+parser.add_argument('--num-workers', type=int, default=4,
                     help='number of parallel environments to run')
 parser.add_argument('--num-steps', type=int, default=400,
                     help='number of steps the agent takes before updating')
@@ -58,7 +57,7 @@ if __name__ == "__main__":
     run_name = args.run_name
 
     save_steps = list(torch.arange(0, int(args.max_steps), int(args.max_steps) // 10).numpy())
-    logger = Logger(args.run_name, args)
+    # logger = Logger(args.run_name, args)
 
     cuda_is_available = torch.cuda.is_available() and args.cuda
     device = torch.device("cuda" if cuda_is_available else "cpu")
@@ -98,7 +97,6 @@ if __name__ == "__main__":
                                 'adv_m', 'adv_w'])
         rewards = 0
         for _ in range(args.num_steps):
-
             action_dist, goals, states, value_m, value_w = feudalnet(
                 x, goals, states, masks[-1])
 
@@ -138,15 +136,6 @@ if __name__ == "__main__":
         optimizer.step()
         # logger.log_scalars(loss_dict, step)
 
-        if len(save_steps) > 0 and step > save_steps[0]:
-            torch.save({
-                'model': feudalnet.state_dict(),
-                'args': args,
-                'processor_mean': feudalnet.preprocessor.rms.mean,
-                'optim': optimizer.state_dict()},
-                f'models/{args.env_name}_{args.run_name}_step={step}.pt')
-            save_steps.pop(0)
-
     plt.plot(episode_rewards)
     plt.xlabel("Episodes")
     plt.ylabel("Total Reward")
@@ -160,3 +149,4 @@ if __name__ == "__main__":
         'processor_mean': feudalnet.preprocessor.rms.mean,
         'optim': optimizer.state_dict()},
         f'models/{args.env_name}_{args.run_name}_steps={step}.pt')
+
