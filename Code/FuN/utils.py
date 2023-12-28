@@ -5,31 +5,8 @@ import torch
 from torch.distributions import Categorical
 
 
-class ReturnWrapper(gym.Wrapper):
-    def __init__(self, env):
-        super().__init__(env)
-        self.total_rewards = 0
-        self.steps = 0
-
-    def step(self, action):
-        obs, reward, done, info = self.env.step(action)
-        self.total_rewards += reward
-        self.steps += 1
-        if done:
-            info['returns/episodic_reward'] = self.total_rewards
-            info['returns/episodic_length'] = self.steps
-            self.total_rewards = 0
-            self.steps = 0
-        else:
-            info['returns/episodic_reward'] = None
-            info['returns/episodic_length'] = None
-
-        return obs, reward, done, info
-
-
 def atari_wrapper(env):
     env = AtariPreprocessing(env, grayscale_obs=False, scale_obs=True)
-    # env = ReturnWrapper(env)
     env = TransformReward(env, lambda r: np.sign(r))
     return env
 
