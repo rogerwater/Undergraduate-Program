@@ -44,7 +44,7 @@ w_t = \phi(\sum^t_{i=t-c}g_i)
 $$
 
 $$
-h^W,U_t = f^{Wrnn}(z_t,h^W_{t-1})
+w_t = \phi(\sum^t_{i=t-c}g_i)
 $$
 
 $$
