@@ -10,7 +10,7 @@ class RefuelingEnv():
         # 第三行表示四个工具的grab状态，初始状态下都位于工具箱处且未被抓取
         # 第六行表示加注位置，姿态和加注状态，初始状态下加注状态为1，表示未加注
         # 未被抓取的工具的grab状态为1，被抓取的工具的grab状态为2
-        self.state_space_shape = (16, )
+        self.state_space_shape = 16
         self.action_space_shape = 14
         self.robot_init_state = (-7.3, 0.5, 2, 1)
         self.tool_box_state = (-7.3, 0.5, 2, 0)

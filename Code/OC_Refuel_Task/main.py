@@ -44,7 +44,7 @@ def run_option_critic(args):
     option_critic = OptionCriticFeatures
     device = torch.device('cuda' if torch.cuda.is_available() and args.cuda else 'cpu')
     option_critic = option_critic(
-        in_features=24,
+        in_features=16,
         num_actions=env.action_space_shape,
         device=device,
         num_options=args.num_options,
