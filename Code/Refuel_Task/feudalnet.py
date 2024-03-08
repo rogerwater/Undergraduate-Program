@@ -8,7 +8,7 @@ from preprocess import Preprocessor
 
 class FeudalNet(nn.Module):
     def __init__(self, num_workers, input_dim, hidden_dim_manager, hidden_dim_worker,
-                 n_actions, time_horizon=5, dilation=5, device='cpu', args=None):
+                 n_actions, time_horizon=10, dilation=10, device='cpu', args=None):
         super(FeudalNet, self).__init__()
         self.b = num_workers
         self.c = time_horizon
@@ -104,9 +104,9 @@ class Perception(nn.Module):
     def __init__(self, input_dim, d):
         super(Perception, self).__init__()
         self.percept = nn.Sequential(
-            nn.Linear(input_dim, 16),
+            nn.Linear(input_dim, 128),
             nn.ReLU(),
-            nn.Linear(16, d),
+            nn.Linear(128, d),
             nn.ReLU())
 
     def forward(self, x):

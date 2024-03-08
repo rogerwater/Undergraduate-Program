@@ -6,6 +6,7 @@ import random
 from net import feudal_networks
 from replay_buffer import replay_buffer
 from model import RefuelingEnv
+from matplotlib import pyplot as plt
 
 
 class feudal_model(object):
@@ -116,6 +117,8 @@ class feudal_model(object):
         self.optimizer.zero_grad()
 
     def run(self):
+        episode_reward = []
+        episode_reward_weighted = []
         for i in range(self.episode):
             obs = self.env.reset()
             total_reward = 0
@@ -138,27 +141,39 @@ class feudal_model(object):
                 self.buffer.store(obs, mstate, goal, m_value, policy, w_value_int, w_value_ext, reward, done, action)
                 obs = next_obs
 
+                if i == self.episode - 1:
+                    print('Step: {}, Action: {}'.format(steps_num, self.env.get_action_by_index(action)))
                 if self.count % self.update_freq == 0:
                     self.train()
 
-                if done or steps_num > 100:
+                if done or steps_num > 50:
                     if not self.weight_reward:
                         self.weight_reward = total_reward
                     else:
                         self.weight_reward = 0.99 * self.weight_reward + 0.01 * total_reward
                     print('Episode: {}, Reward: {}, Weighted Reward: {:.2f}'.format(i + 1, total_reward, self.weight_reward))
                     break
+            episode_reward.append(total_reward)
+            episode_reward_weighted.append(self.weight_reward)
+        plt.plot(episode_reward)
+        plt.plot(episode_reward_weighted)
+        plt.xlabel('Episode')
+        plt.ylabel('Reward')
+        plt.title('Feudal Networks on Refuel Task')
+        plt.legend(['Reward', 'Weighted Reward'])
+        plt.show()
 
 
 if __name__ == "__main__":
     env = RefuelingEnv()
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = feudal_model(
         env=env,
         capacity=200,
-        update_freq=200,
-        episode=10000,
-        feature_dim=256,
-        k_dim=16,
+        update_freq=400,
+        episode=3000,
+        feature_dim=128,
+        k_dim=8,
         dilation=10,
         horizon_c=10,
         learning_rate=1e-4,

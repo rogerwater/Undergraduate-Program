@@ -15,7 +15,7 @@ parser.add_argument('--env-name', type=str, default='BreakoutNoFrameskip-v4',
                     help='gym environment name')
 parser.add_argument('--num-workers', type=int, default=1,
                     help='number of parallel environments to run')
-parser.add_argument('--num-steps', type=int, default=50,
+parser.add_argument('--num-steps', type=int, default=100,
                     help='number of steps the agent takes before updating')
 parser.add_argument('--max-steps', type=int, default=int(1e7),
                     help='maximum number of training steps in total')
@@ -23,16 +23,16 @@ parser.add_argument('--max-episodes', type=int, default=1e4,
                     help='maximum number of training episodes in total')
 parser.add_argument('--cuda', type=bool, default=True,
                     help='Add cuda')
-parser.add_argument('--grad-clip', type=float, default=1.0,
+parser.add_argument('--grad-clip', type=float, default=0.5,
                     help='Gradient clipping (recommended).')
 parser.add_argument('--entropy-coef', type=float, default=0.01,
                     help='Entropy coefficient to encourage exploration.')
 # Specific Feudal Networks Parameters
-parser.add_argument('--time-horizon', type=int, default=5,
+parser.add_argument('--time-horizon', type=int, default=10,
                     help='Manager horizon (c)')
-parser.add_argument('--hidden-dim-manager', type=int, default=8,
+parser.add_argument('--hidden-dim-manager', type=int, default=128,
                     help='Hidden dim (d)')
-parser.add_argument('--hidden-dim-worker', type=int, default=2,
+parser.add_argument('--hidden-dim-worker', type=int, default=16,
                     help='Hidden dim for worker (k)')
 parser.add_argument('--gamma-w', type=float, default=0.99,
                     help="discount factor worker")
@@ -42,7 +42,7 @@ parser.add_argument('--alpha', type=float, default=0.5,
                     help='Intrinsic reward coefficient in [0, 1]')
 parser.add_argument('--eps', type=float, default=int(1e-5),
                     help='Random Gausian goal for exploration')
-parser.add_argument('--dilation', type=int, default=5,
+parser.add_argument('--dilation', type=int, default=10,
                     help='Dilation parameter for manager LSTM.')
 # Experiment Related Parameters
 parser.add_argument('--run-name', type=str, default='baseline',

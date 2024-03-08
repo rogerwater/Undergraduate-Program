@@ -48,18 +48,20 @@ class RefuelingEnv():
         return self.reverse_action_mapping.get(action, None)
 
     def step(self, action):
-        reward = -0.3
+        reward = -0.5
         done = False
 
         if action == 'move_to_toolbox':
             self.state[0][0] = self.tool_box_state[0]
             self.state[0][1] = self.tool_box_state[1]
             self.state[0][2] = self.tool_box_state[2]
+            reward = -0.1
 
         elif action == 'move_to_refueling_position':
             self.state[0][0] = self.refueling_state[0]
             self.state[0][1] = self.refueling_state[1]
             self.state[0][2] = self.refueling_state[2]
+            reward = -0.1
 
         elif action.startswith('grab_tool_'):
             tool_index = self.tool_actions.index(action[10:])
@@ -70,7 +72,6 @@ class RefuelingEnv():
                     self.state[2][tool_index] == 1 and self.state[0][3] == 1:
                 self.state[2][tool_index] = 2
                 self.state[0][3] = 2
-            else:
                 reward = -0.1
 
         elif action.startswith('release_tool_'):
@@ -82,26 +83,20 @@ class RefuelingEnv():
                     self.state[2][tool_index] == 2 and self.state[0][3] == 2:
                 self.state[2][tool_index] = 1
                 self.state[0][3] = 1
-            else:
                 reward = -0.1
 
         elif action in self.tool_actions:
             # 前提条件：机器人在加注位置，工具在机器人处，工具被抓取，加注状态所需工具与当前所持工具一致
-            if self.current_action_index <= len(self.tool_actions) and action == self.tool_actions[
-                self.current_action_index - 1]:
+            if self.current_action_index <= len(self.tool_actions) and action == self.tool_actions[self.current_action_index - 1]:
                 if self.state[0][0] == self.refueling_state[0] and \
                         self.state[0][1] == self.refueling_state[1] and \
                         self.state[0][2] == self.refueling_state[2] and \
                         self.state[2][self.current_action_index - 1] == 2 and self.state[0][3] == 2:
                     self.current_action_index += 1
                     self.state[3][3] += 1
-                    reward = 3
-                else:
-                    reward = -0.3
-            else:
-                reward = -0.3
+                    reward = 5
 
-        if self.current_action_index == len(self.tool_actions) + 1:
+        if self.state[3][3] == 5:
             done = True
 
         return self.state.flatten(), reward, done
