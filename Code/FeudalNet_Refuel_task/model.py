@@ -110,7 +110,7 @@ if __name__ == "__main__":
     refuel_env.reset()
     print("Initial State:")
     print(refuel_env.state)
-    # print(refuel_env.action_space)
+    print(refuel_env.action_space)
     # action = 1
     # print(refuel_env.get_action_by_index(action))
     for _ in range(10):
