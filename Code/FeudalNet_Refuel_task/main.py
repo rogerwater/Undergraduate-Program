@@ -5,7 +5,7 @@ import numpy as np
 import random
 from net import feudal_networks
 from replay_buffer import replay_buffer
-from model import RefuelingEnv
+from model import RefuelingEnv, UncoverEnv
 from matplotlib import pyplot as plt
 
 
@@ -146,7 +146,7 @@ class feudal_model(object):
                 if self.count % self.update_freq == 0:
                     self.train()
 
-                if done or steps_num > 50:
+                if done or steps_num > 20:
                     if not self.weight_reward:
                         self.weight_reward = total_reward
                     else:
@@ -165,12 +165,12 @@ class feudal_model(object):
 
 
 if __name__ == "__main__":
-    env = RefuelingEnv()
+    env = UncoverEnv()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = feudal_model(
         env=env,
         capacity=200,
-        update_freq=400,
+        update_freq=200,
         episode=3000,
         feature_dim=128,
         k_dim=8,
