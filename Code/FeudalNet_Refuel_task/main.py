@@ -27,6 +27,8 @@ class feudal_model(object):
         self.gamma = gamma
         self.entropy_weight = entropy_weight
 
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
         self.observation_dim = self.env.state_space_shape
         self.action_dim = self.env.action_space_shape
         self.net = feudal_networks(self.observation_dim, self.feature_dim, self.k_dim, self.action_dim, self.dilation, self.horizon_c)
@@ -146,7 +148,7 @@ class feudal_model(object):
                 if self.count % self.update_freq == 0:
                     self.train()
 
-                if done or steps_num > 20:
+                if done or steps_num > 15:
                     if not self.weight_reward:
                         self.weight_reward = total_reward
                     else:
@@ -167,16 +169,17 @@ class feudal_model(object):
 if __name__ == "__main__":
     env = UncoverEnv()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    torch.manual_seed(0)
     model = feudal_model(
         env=env,
         capacity=200,
-        update_freq=200,
-        episode=3000,
-        feature_dim=128,
-        k_dim=8,
-        dilation=10,
-        horizon_c=10,
-        learning_rate=1e-4,
+        update_freq=400,
+        episode=2000,
+        feature_dim=64,
+        k_dim=4,
+        dilation=5,
+        horizon_c=5,
+        learning_rate=1e-3,
         alpha=0.5,
         gamma=0.99,
         entropy_weight=1e-4,
