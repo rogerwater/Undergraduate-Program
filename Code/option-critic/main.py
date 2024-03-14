@@ -138,6 +138,7 @@ def run_option_critic(args):
 
     return episode_reward
 
+
 def run_actor_critic(args):
     env = gym.make(args.env)
     device = torch.device('cuda' if torch.cuda.is_available() and args.cuda else 'cpu')

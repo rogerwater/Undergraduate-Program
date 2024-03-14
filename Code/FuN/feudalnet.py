@@ -19,7 +19,7 @@ class FeudalNet(nn.Module):
         self.n_actions = n_actions
         self.device = device
 
-        self.preprocessor = Preprocessor(input_dim, device, mlp)
+        self.preprocessor = Preprocessor(input_dim, device)
         self.precept = Perception(input_dim[-1], self.d, mlp)
         self.manager = Manager(self.c, self.d, self.r, args, device)
         self.worker = Worker(self.b, self.c, self.d, self.k, n_actions, device)

@@ -6,12 +6,13 @@ from model import RefuelingEnv
 from utils import take_action
 from feudalnet import FeudalNet, feudal_loss
 from storage import Storage
+import gym
 
 parser = argparse.ArgumentParser(description='Feudal Networks')
 # Generic RL/Model Parameters
 parser.add_argument('--lr', type=float, default=0.0005,
                     help='learning rate')
-parser.add_argument('--env-name', type=str, default='BreakoutNoFrameskip-v4',
+parser.add_argument('--env-name', type=str, default='CartPole-v0',
                     help='gym environment name')
 parser.add_argument('--num-workers', type=int, default=1,
                     help='number of parallel environments to run')
@@ -60,14 +61,14 @@ if __name__ == '__main__':
         torch.backends.cudnn.deterministic = True
         torch.backends.cudnn.benchmark = False
 
-    env = RefuelingEnv()
+    env = gym.make(args.env_name)
 
     feudalnet = FeudalNet(
         num_workers=args.num_workers,
-        input_dim=env.state_space_shape,
+        input_dim=env.observation_space.shape[0],
         hidden_dim_manager=args.hidden_dim_manager,
         hidden_dim_worker=args.hidden_dim_worker,
-        n_actions=env.action_space_shape,
+        n_actions=env.action_space.n,
         dilation=args.dilation,
         device=device,
         args=args
