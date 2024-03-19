@@ -171,9 +171,8 @@ class feudal_model(object):
 
 
 if __name__ == "__main__":
-    env = UncoverEnv()
+    env = RefuelingEnv()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    torch.manual_seed(0)
     model = feudal_model(
         env=env,
         capacity=200,
@@ -181,8 +180,8 @@ if __name__ == "__main__":
         episode=2000,
         feature_dim=128,
         k_dim=8,
-        dilation=5,
-        horizon_c=5,
+        dilation=10,
+        horizon_c=10,
         learning_rate=1e-3,
         alpha=0.5,
         gamma=0.99,
