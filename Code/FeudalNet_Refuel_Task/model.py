@@ -25,7 +25,7 @@ class RefuelingEnv():
         self.action_mapping = {idx: action for idx, action in enumerate(self.action_space)}
         self.reverse_action_mapping = {action: idx for idx, action in enumerate(self.action_space)}
 
-        self.current_action_index = 1  # 判断加注任务执行到哪一步：1表示未开始，2表示uncover，3表示screw，4表示insert，5表示replenish
+        # self.current_action_index = 1  # 判断加注任务执行到哪一步：1表示未开始，2表示uncover，3表示screw，4表示insert，5表示replenish
         self.state = None
         self.reset()
 
@@ -87,17 +87,42 @@ class RefuelingEnv():
 
         elif action in self.tool_actions:
             # 前提条件：机器人在加注位置，工具在机器人处，工具被抓取，加注状态所需工具与当前所持工具一致
-            if self.current_action_index <= len(self.tool_actions) and action == self.tool_actions[self.current_action_index - 1]:
+            if action == self.tool_actions[0]:
                 if self.state[0][0] == self.refueling_state[0] and \
                         self.state[0][1] == self.refueling_state[1] and \
                         self.state[0][2] == self.refueling_state[2] and \
-                        self.state[2][self.current_action_index - 1] == 2 and self.state[0][3] == 2:
-                    self.current_action_index += 1
-                    self.state[3][3] += 1
+                        self.state[2][0] == 2 and self.state[0][3] == 2 and \
+                        self.state[3][3] == 1:
+                    self.state[3][3] = self.state[3][3] + 1
+                    reward = 5
+            if action == self.tool_actions[1]:
+                if self.state[0][0] == self.refueling_state[0] and \
+                        self.state[0][1] == self.refueling_state[1] and \
+                        self.state[0][2] == self.refueling_state[2] and \
+                        self.state[2][1] == 2 and self.state[0][3] == 2 and \
+                        self.state[3][3] == 2:
+                    self.state[3][3] = self.state[3][3] + 1
+                    reward = 5
+            if action == self.tool_actions[2]:
+                if self.state[0][0] == self.refueling_state[0] and \
+                        self.state[0][1] == self.refueling_state[1] and \
+                        self.state[0][2] == self.refueling_state[2] and \
+                        self.state[2][2] == 2 and self.state[0][3] == 2 and \
+                        self.state[3][3] == 3:
+                    self.state[3][3] = self.state[3][3] + 1
+                    reward = 5
+            if action == self.tool_actions[3]:
+                if self.state[0][0] == self.refueling_state[0] and \
+                        self.state[0][1] == self.refueling_state[1] and \
+                        self.state[0][2] == self.refueling_state[2] and \
+                        self.state[2][3] == 2 and self.state[0][3] == 2 and \
+                        self.state[3][3] == 4:
+                    self.state[3][3] = self.state[3][3] + 1
                     reward = 5
 
         if self.state[3][3] == 5:
             done = True
+            reward = 20
 
         return self.state.flatten(), reward, done
 
@@ -207,20 +232,11 @@ if __name__ == "__main__":
     print("Initial State:")
     print(refuel_env.state)
     print(refuel_env.action_space)
-    # refuel_env = RefuelingEnv()
-    # refuel_env.reset()
-    # print("Initial State:")
-    # print(refuel_env.state)
-    # print(refuel_env.action_space)
-    # action = 1
-    # print(refuel_env.get_action_by_index(action))
-    uncover_env = UncoverEnv()
-    uncover_env.reset()
+    print(len(refuel_env.tool_actions))
+    refuel_env = RefuelingEnv()
+    refuel_env.reset()
     print("Initial State:")
-    print(uncover_env.state)
-    for _ in range(10):
-        action = uncover_env.choose_action()
-        state, reward, done = uncover_env.step(action)
-        print(f"Action: {action}, Reward: {reward}, Done: {done}, State:\n{state}")
-    print("Final State:")
-    print(uncover_env.state)
+    print(refuel_env.state)
+    print(refuel_env.action_space)
+    action = 1
+    print(refuel_env.get_action_by_index(action))

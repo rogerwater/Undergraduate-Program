@@ -7,6 +7,7 @@ from net import feudal_networks
 from replay_buffer import replay_buffer
 from model import RefuelingEnv, UncoverEnv
 from matplotlib import pyplot as plt
+from constraint_lib import constraints_library
 
 
 class feudal_model(object):
@@ -31,13 +32,13 @@ class feudal_model(object):
 
         self.observation_dim = self.env.state_space_shape
         self.action_dim = self.env.action_space_shape
-        self.net = feudal_networks(self.observation_dim, self.feature_dim, self.k_dim, self.action_dim, self.dilation, self.horizon_c).to(self.device)
+        self.net = feudal_networks(self.observation_dim, self.feature_dim, self.k_dim, self.action_dim, self.dilation, self.horizon_c)
         self.buffer = replay_buffer(self.capacity)
         self.optimizer = torch.optim.Adam(self.net.parameters(), lr=self.learning_rate)
-        self.h_m = torch.zeros([1, self.feature_dim]).to(self.device)
-        self.c_m = torch.zeros([1, self.feature_dim]).to(self.device)
-        self.h_w = torch.zeros([1, self.action_dim * self.k_dim]).to(self.device)
-        self.c_w = torch.zeros([1, self.action_dim * self.k_dim]).to(self.device)
+        self.h_m = torch.zeros([1, self.feature_dim])
+        self.c_m = torch.zeros([1, self.feature_dim])
+        self.h_w = torch.zeros([1, self.action_dim * self.k_dim])
+        self.c_w = torch.zeros([1, self.action_dim * self.k_dim])
         self.count = 0
         self.weight_reward = None
 
@@ -48,20 +49,20 @@ class feudal_model(object):
             run_return = rewards[i] + self.gamma * run_return * (1. - dones[i])
             returns.append(run_return)
         returns = list(reversed(returns))
-        returns = torch.cat(returns, dim=0).unsqueeze(1).to(self.device)
+        returns = torch.cat(returns, dim=0).unsqueeze(1)
         return returns
 
     def train(self):
         # Need to notice that the valid range of samples is [horizon_c:-horizon_c]
         observations, mstates, goals, m_values, policies, w_values_int, w_values_ext, rewards_ext, dones, actions = self.buffer.sample()
-        actions = torch.LongTensor(actions).to(self.device)
-        observations = torch.FloatTensor(np.vstack(observations)).to(self.device)
-        dones = torch.FloatTensor(dones).to(self.device)
-        rewards_ext = torch.FloatTensor(rewards_ext).to(self.device)
-        m_values = torch.cat(m_values, 0).to(self.device)
-        policies = torch.cat(policies, 0).to(self.device)
-        w_values_int = torch.cat(w_values_int, 0).to(self.device)
-        w_values_ext = torch.cat(w_values_ext, 0).to(self.device)
+        actions = torch.LongTensor(actions)
+        observations = torch.FloatTensor(np.vstack(observations))
+        dones = torch.FloatTensor(dones)
+        rewards_ext = torch.FloatTensor(rewards_ext)
+        m_values = torch.cat(m_values, 0)
+        policies = torch.cat(policies, 0)
+        w_values_int = torch.cat(w_values_int, 0)
+        w_values_ext = torch.cat(w_values_ext, 0)
         rewards_int = []
 
         for i in range(self.horizon_c, observations.size(0)):
@@ -73,15 +74,15 @@ class feudal_model(object):
                 reward_int = reward_int + F.cosine_similarity(s - s_, g_)
             reward_int = reward_int / self.horizon_c
             rewards_int.append(reward_int)
-        rewards_int = torch.cat(rewards_int, 0).unsqueeze(1).to(self.device)
+        rewards_int = torch.cat(rewards_int, 0).unsqueeze(1)
 
-        m_returns = torch.tensor(self.get_returns(rewards_ext, dones, m_values)).to(self.device)
-        w_returns_ext = torch.tensor(self.get_returns(rewards_ext, dones, w_values_ext)).to(self.device)
-        w_returns_int = torch.tensor(self.get_returns(rewards_int, dones[self.horizon_c:], w_values_int[self.horizon_c:])).to(self.device)
+        m_returns = torch.tensor(self.get_returns(rewards_ext, dones, m_values))
+        w_returns_ext = torch.tensor(self.get_returns(rewards_ext, dones, w_values_ext))
+        w_returns_int = torch.tensor(self.get_returns(rewards_int, dones[self.horizon_c:], w_values_int[self.horizon_c:]))
 
-        m_adv = (m_returns - m_values).to(self.device)
-        w_ext_adv = (w_returns_ext - w_values_ext).to(self.device)
-        w_int_adv = (w_returns_int[:-self.horizon_c, :] - w_values_int[self.horizon_c: -self.horizon_c, :]).to(self.device)
+        m_adv = (m_returns - m_values)
+        w_ext_adv = (w_returns_ext - w_values_ext)
+        w_int_adv = (w_returns_int[:-self.horizon_c, :] - w_values_int[self.horizon_c: -self.horizon_c, :])
 
         m_loss = []
         for i in range(0, observations.size(0) - self.horizon_c):
@@ -90,27 +91,25 @@ class feudal_model(object):
             g = goals[i]
             cos_sim = F.cosine_similarity(s - s_, g)
             m_loss.append(- m_adv[i].detach() * cos_sim)
-        m_loss = torch.cat(m_loss, 0).unsqueeze(1).to(self.device)
+        m_loss = torch.cat(m_loss, 0).unsqueeze(1)
 
         dists = torch.distributions.Categorical(policies)
         log_probs = dists.log_prob(actions)
         w_loss = - (w_ext_adv[self.horizon_c: - self.horizon_c, :] + self.alpha * w_int_adv).detach() * log_probs.unsqueeze(1)[self.horizon_c: -self.horizon_c, :] - self.entropy_weight * dists.entropy().unsqueeze(1)[self.horizon_c: -self.horizon_c]
-        w_loss.to(self.device)
 
-        m_returns = m_returns[self.horizon_c: -self.horizon_c, :].to(self.device)
-        m_values = m_values[self.horizon_c: -self.horizon_c, :].to(self.device)
-        w_returns_ext = w_returns_ext[self.horizon_c: -self.horizon_c, :].to(self.device)
-        w_values_ext = w_values_ext[self.horizon_c: -self.horizon_c, :].to(self.device)
-        w_returns_int = w_returns_int[: -self.horizon_c, :].to(self.device)
-        w_values_int = w_values_int[self.horizon_c: -self.horizon_c, :].to(self.device)
-        m_loss = m_loss[self.horizon_c:, :].to(self.device)
+        m_returns = m_returns[self.horizon_c: -self.horizon_c, :]
+        m_values = m_values[self.horizon_c: -self.horizon_c, :]
+        w_returns_ext = w_returns_ext[self.horizon_c: -self.horizon_c, :]
+        w_values_ext = w_values_ext[self.horizon_c: -self.horizon_c, :]
+        w_returns_int = w_returns_int[: -self.horizon_c, :]
+        w_values_int = w_values_int[self.horizon_c: -self.horizon_c, :]
+        m_loss = m_loss[self.horizon_c:, :]
 
-        m_critic_loss = (m_returns.detach() - m_values).pow(2).to(self.device)
-        w_critic_ext_loss = (w_returns_ext.detach() - w_values_ext).pow(2).to(self.device)
-        w_critic_int_loss = (w_returns_int.detach() - w_values_int).pow(2).to(self.device)
+        m_critic_loss = (m_returns.detach() - m_values).pow(2)
+        w_critic_ext_loss = (w_returns_ext.detach() - w_values_ext).pow(2)
+        w_critic_int_loss = (w_returns_int.detach() - w_values_int).pow(2)
 
         loss = m_loss + m_critic_loss + w_loss + w_critic_int_loss + w_critic_ext_loss
-        loss.to(self.device)
         loss = loss.mean()
 
         torch.autograd.set_detect_anomaly(True)
@@ -125,22 +124,30 @@ class feudal_model(object):
         episode_reward_weighted = []
         for i in range(self.episode):
             obs = self.env.reset()
+            pre_action = "move_to_toolbox"
             total_reward = 0
             steps_num = 0
 
             while True:
                 # Manager change the goal every horizon_c steps
                 if self.count % self.horizon_c == 0:
-                    # mstate, goal, m_hidden_new, m_value = self.net.get_goal(torch.FloatTensor(np.expand_dims(obs, 0)), (self.h_m, self.c_m), self.count)
-                    mstate, goal, m_hidden_new, m_value = self.net.get_goal(torch.FloatTensor(np.expand_dims(obs, 0)).to(self.device), (self.h_m, self.c_m), self.count)
+                    mstate, goal, m_hidden_new, m_value = self.net.get_goal(torch.FloatTensor(np.expand_dims(obs, 0)), (self.h_m, self.c_m), self.count)
                     self.net.store_goal(goal)
-                policy, w_hidden_new, w_value_int, w_value_ext = self.net.get_policy(torch.FloatTensor(np.expand_dims(obs, 0)).to(self.device), (self.h_w, self.c_w))
+                policy, w_hidden_new, w_value_int, w_value_ext = self.net.get_policy(torch.FloatTensor(np.expand_dims(obs, 0)), (self.h_w, self.c_w))
 
                 self.h_m, self.c_m = m_hidden_new
                 self.h_w, self.c_w = w_hidden_new
+
                 dist = torch.distributions.Categorical(policy)
                 action = dist.sample().detach().item()
-                next_obs, reward, done = self.env.step(self.env.get_action_by_index(action))
+
+                # 约束库处理，改善机器人动作
+                action = self.env.get_action_by_index(action)
+                action = constraints_library(self.env, pre_action, action)
+                next_obs, reward, done = self.env.step(action)
+                pre_action = action
+                action = self.env.get_index_by_action(action)
+
                 steps_num += 1
                 total_reward += reward
                 self.count += 1
@@ -148,11 +155,12 @@ class feudal_model(object):
                 obs = next_obs
 
                 if i == self.episode - 1:
-                    print('Step: {}, Action: {}'.format(steps_num, self.env.get_action_by_index(action)))
+                    print('Step: {}, Action: {}, Reward: {}'.format(steps_num, self.env.get_action_by_index(action), reward))
+                    # print('Current_State: {}'.format(self.env.state))
                 if self.count % self.update_freq == 0:
                     self.train()
 
-                if done or steps_num > 15:
+                if done or steps_num > 40:
                     if not self.weight_reward:
                         self.weight_reward = total_reward
                     else:
@@ -165,8 +173,9 @@ class feudal_model(object):
         plt.plot(episode_reward_weighted)
         plt.xlabel('Episode')
         plt.ylabel('Reward')
-        plt.title('Feudal Networks on Refuel Task')
+        plt.title('Feudal Networks on Refuel Task with Constraint Library')
         plt.legend(['Reward', 'Weighted Reward'])
+        plt.savefig('Figure_2.png')
         plt.show()
 
 
@@ -176,10 +185,10 @@ if __name__ == "__main__":
     model = feudal_model(
         env=env,
         capacity=200,
-        update_freq=400,
-        episode=2000,
-        feature_dim=128,
-        k_dim=8,
+        update_freq=200,
+        episode=4000,
+        feature_dim=256,
+        k_dim=16,
         dilation=10,
         horizon_c=10,
         learning_rate=1e-3,
