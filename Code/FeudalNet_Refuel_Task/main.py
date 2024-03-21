@@ -143,9 +143,9 @@ class feudal_model(object):
 
                 # 约束库处理，改善机器人动作
                 action = self.env.get_action_by_index(action)
-                action = constraints_library(self.env, pre_action, action)
+                # action = constraints_library(self.env, pre_action, action)
                 next_obs, reward, done = self.env.step(action)
-                pre_action = action
+                # pre_action = action
                 action = self.env.get_index_by_action(action)
 
                 steps_num += 1
@@ -160,7 +160,7 @@ class feudal_model(object):
                 if self.count % self.update_freq == 0:
                     self.train()
 
-                if done or steps_num > 40:
+                if done or steps_num > 20:
                     if not self.weight_reward:
                         self.weight_reward = total_reward
                     else:
@@ -173,22 +173,24 @@ class feudal_model(object):
         plt.plot(episode_reward_weighted)
         plt.xlabel('Episode')
         plt.ylabel('Reward')
-        plt.title('Feudal Networks on Refuel Task with Constraint Library')
+        #plt.title('Feudal Networks on Refuel Task with Constraint Library')
+        plt.title('Feudal Networks on Uncover Task')
         plt.legend(['Reward', 'Weighted Reward'])
         plt.savefig('Figure_2.png')
         plt.show()
 
 
 if __name__ == "__main__":
-    env = RefuelingEnv()
+    #env = RefuelingEnv()
+    env = UncoverEnv()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = feudal_model(
         env=env,
-        capacity=200,
-        update_freq=200,
-        episode=4000,
-        feature_dim=256,
-        k_dim=16,
+        capacity=100,
+        update_freq=100,
+        episode=500,
+        feature_dim=64,
+        k_dim=4,
         dilation=10,
         horizon_c=10,
         learning_rate=1e-3,

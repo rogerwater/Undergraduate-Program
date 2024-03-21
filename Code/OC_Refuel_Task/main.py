@@ -6,8 +6,8 @@ from copy import deepcopy
 from option_critic import OptionCriticFeatures
 from option_critic import critic_loss as critic_loss_fn
 from option_critic import actor_loss as actor_loss_fn
-from model import RefuelingEnv
-
+from model import RefuelingEnv, UncoverEnv
+from constraint_lib import constraints_library
 from experience_replay import ReplayBuffer
 from utils import to_tensor
 
@@ -30,21 +30,22 @@ parser.add_argument('--entropy-reg', type=float, default=0.01, help=('Regulariza
 parser.add_argument('--num-options', type=int, default=4, help=('Number of options to create'))
 parser.add_argument('--temp', type=float, default=1, help='Action distribution softmax tempurature param')
 
-parser.add_argument('--max_steps_ep', type=int, default=40, help='Number of maximum steps per episode')
+parser.add_argument('--max_steps_ep', type=int, default=50, help='Number of maximum steps per episode')
 # parser.add_argument('--max_steps_total', type=int, default=50000, help='Number of maximum steps to take')
 parser.add_argument('--cuda', type=bool, default=True, help='Enable CUDA training (recommended if possible).')
 parser.add_argument('--seed', type=int, default=0, help='Random seed for numpy, torch, random.')
 parser.add_argument('--logdir', type=str, default='runs', help='Directory for logging statistics')
 parser.add_argument('--exp', type=str, default=None, help='Optional experiment name')
-parser.add_argument('--max_episode', type=int, default=10000, help='Number of maximum episodes')
+parser.add_argument('--max_episode', type=int, default=5000, help='Number of maximum episodes')
 
 
 def run_option_critic(args):
     env = RefuelingEnv()
+    # env = UncoverEnv()
     option_critic = OptionCriticFeatures
     device = torch.device('cuda' if torch.cuda.is_available() and args.cuda else 'cpu')
     option_critic = option_critic(
-        in_features=16,
+        in_features=env.state_space_shape,
         num_actions=env.action_space_shape,
         device=device,
         num_options=args.num_options,
@@ -80,6 +81,8 @@ def run_option_critic(args):
         ep_steps = 0
         option_termination = True
         curr_op_len = 0
+        # 根据上一个动作提供建议动作
+        pre_action = 'move_to_toolbox'
         while not done and ep_steps < args.max_steps_ep:
             epsilon = option_critic.epsilon
 
@@ -89,11 +92,14 @@ def run_option_critic(args):
                 curr_op_len = 0
 
             action, logp, entropy = option_critic.get_action(state, current_option)
+            action = env.get_action_by_index(action)
+            action = constraints_library(env, pre_action, action)
+            pre_action = action
 
-            # if episode_num == args.max_episode - 1:
-            print("Step:", ep_steps, "Action:", env.get_action_by_index(action), "Done:", done)
+            if episode_num == args.max_episode - 1:
+                print("Step:", ep_steps + 1, "Action:", action)
 
-            next_obs, reward, done = env.step(env.get_action_by_index(action))
+            next_obs, reward, done = env.step(action)
 
             buffer.push(obs, current_option, reward, next_obs, done)
             rewards += reward
@@ -137,10 +143,9 @@ if __name__ == "__main__":
     episode_reward_oc = np.array(episode_reward_oc)
 
     plt.plot(episode_reward_oc, label='option-critic')
-    plt.fill_between(range(len(episode_reward_oc)), episode_reward_oc - 10, episode_reward_oc + 10, alpha=0.5)
-    plt.xlabel("Episodes")
-    plt.ylabel("Total Reward")
-    plt.title("Performance on Refuel Task")
-    plt.legend()
+    plt.xlabel("Episode")
+    plt.ylabel("Reward")
+    plt.title("Option Critic on Refuel Task with Constraint Library")
+    # plt.legend()
     plt.show()
 
