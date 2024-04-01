@@ -7,7 +7,7 @@ os.environ["HTTP_PROXY"] = "http://127.0.0.1:7890"
 os.environ["HTTPS_PROXY"] = "http://127.0.0.1:7890"
 
 # Apply the API key
-openai.api_key = "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"
+openai.api_key = os.environ.get("OPENAI_API_KEY")
 
 # Define the text prompt
 prompt = "Please convert the following sentences into a more regular form:\n \
