@@ -16,7 +16,7 @@ class RefuelingEnv():
         self.tool_box_state = (-7.3, 0.5, 2, 0)
         self.tool_state = (1, 1, 1, 1)
         self.refueling_state = (2.4, 4.1, 3.5, 1)
-        self.tool_actions = ['uncover', 'screw', 'insert', 'replenish']
+        self.tool_actions = ['uncover', 'unscrew', 'insert', 'replenish']
         self.action_space = ['move_to_toolbox', 'move_to_refueling_position'] + \
                             ['grab_tool_' + tool for tool in self.tool_actions] + \
                             ['release_tool_' + tool for tool in self.tool_actions] + \
@@ -55,13 +55,13 @@ class RefuelingEnv():
             self.state[0][0] = self.tool_box_state[0]
             self.state[0][1] = self.tool_box_state[1]
             self.state[0][2] = self.tool_box_state[2]
-            reward = -0.1
+            reward = -0.5
 
         elif action == 'move_to_refueling_position':
             self.state[0][0] = self.refueling_state[0]
             self.state[0][1] = self.refueling_state[1]
             self.state[0][2] = self.refueling_state[2]
-            reward = -0.1
+            reward = -0.5
 
         elif action.startswith('grab_tool_'):
             tool_index = self.tool_actions.index(action[10:])
@@ -72,7 +72,7 @@ class RefuelingEnv():
                     self.state[2][tool_index] == 1 and self.state[0][3] == 1:
                 self.state[2][tool_index] = 2
                 self.state[0][3] = 2
-                reward = -0.1
+                reward = -0.5
 
         elif action.startswith('release_tool_'):
             tool_index = self.tool_actions.index(action[13:])
@@ -83,7 +83,7 @@ class RefuelingEnv():
                     self.state[2][tool_index] == 2 and self.state[0][3] == 2:
                 self.state[2][tool_index] = 1
                 self.state[0][3] = 1
-                reward = -0.1
+                reward = -0.5
 
         elif action in self.tool_actions:
             # 前提条件：机器人在加注位置，工具在机器人处，工具被抓取，加注状态所需工具与当前所持工具一致
@@ -94,7 +94,7 @@ class RefuelingEnv():
                         self.state[2][0] == 2 and self.state[0][3] == 2 and \
                         self.state[3][3] == 1:
                     self.state[3][3] = self.state[3][3] + 1
-                    reward = 5
+                    reward = 10
             if action == self.tool_actions[1]:
                 if self.state[0][0] == self.refueling_state[0] and \
                         self.state[0][1] == self.refueling_state[1] and \
@@ -102,7 +102,7 @@ class RefuelingEnv():
                         self.state[2][1] == 2 and self.state[0][3] == 2 and \
                         self.state[3][3] == 2:
                     self.state[3][3] = self.state[3][3] + 1
-                    reward = 5
+                    reward = 10
             if action == self.tool_actions[2]:
                 if self.state[0][0] == self.refueling_state[0] and \
                         self.state[0][1] == self.refueling_state[1] and \
@@ -110,7 +110,7 @@ class RefuelingEnv():
                         self.state[2][2] == 2 and self.state[0][3] == 2 and \
                         self.state[3][3] == 3:
                     self.state[3][3] = self.state[3][3] + 1
-                    reward = 5
+                    reward = 10
             if action == self.tool_actions[3]:
                 if self.state[0][0] == self.refueling_state[0] and \
                         self.state[0][1] == self.refueling_state[1] and \
@@ -118,11 +118,11 @@ class RefuelingEnv():
                         self.state[2][3] == 2 and self.state[0][3] == 2 and \
                         self.state[3][3] == 4:
                     self.state[3][3] = self.state[3][3] + 1
-                    reward = 5
+                    reward = 10
 
         if self.state[3][3] == 5:
             done = True
-            reward = 20
+            reward = 10
 
         return self.state.flatten(), reward, done
 
