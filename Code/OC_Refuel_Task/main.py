@@ -8,9 +8,10 @@ from option_critic import critic_loss as critic_loss_fn
 from option_critic import actor_loss as actor_loss_fn
 from model import RefuelingEnv, UncoverEnv
 from constraint_lib import ConstraintLibrary, PotentialBasedRewardShaping
+from add_advice import add_advice
 from experience_replay import ReplayBuffer
 from utils import to_tensor
-
+from datetime import datetime
 import matplotlib.pyplot as plt
 
 parser = argparse.ArgumentParser(description="Option Critic")
@@ -37,6 +38,7 @@ parser.add_argument('--seed', type=int, default=0, help='Random seed for numpy, 
 parser.add_argument('--logdir', type=str, default='runs', help='Directory for logging statistics')
 parser.add_argument('--exp', type=str, default=None, help='Optional experiment name')
 parser.add_argument('--max_episode', type=int, default=1500, help='Number of maximum episodes')
+parser.add_argument('--advice_frequency', type=int, default=100, help='Frequency of add advice')
 
 
 def run_option_critic(args):
@@ -45,7 +47,9 @@ def run_option_critic(args):
     # Potential based reward shaping
     pbrs = PotentialBasedRewardShaping(args.gamma, w=0.5)
     pbrs.add_constraint_automatically()
-    print("Constraint Library: ", pbrs.constraint_library.constraint_dict)
+    print("Constraint Library: ")
+    for key, value in pbrs.constraint_library.constraint_dict.items():
+        print(key, value)
 
     option_critic = OptionCriticFeatures
     device = torch.device('cuda' if torch.cuda.is_available() and args.cuda else 'cpu')
@@ -75,6 +79,7 @@ def run_option_critic(args):
     episode_num = 0
     episode_reward = []
     constraint_violations = []
+    action_sequence = []
 
     while episode_num < args.max_episode:
         num_constraint_violations = 0
@@ -112,8 +117,10 @@ def run_option_critic(args):
             buffer.push(obs, current_option, reward, next_obs, done)
             rewards += reward
 
-            if episode_num == args.max_episode - 1:
-                print("Step:", ep_steps + 1, "Action:", action, "Reward:", reward, "Constraint Violation:", is_violated)
+            if (episode_num + 1) % args.advice_frequency == 0:
+                print("Step:", ep_steps + 1, "Action:", action, "Reward:", reward)
+            if episode_num + 1 == args.max_episode:
+                action_sequence.append(action)
 
             if len(buffer) > args.batch_size:
                 actor_loss = actor_loss_fn(obs, current_option, logp, entropy,
@@ -144,6 +151,21 @@ def run_option_critic(args):
         episode_reward.append(rewards)
         constraint_violations.append(num_constraint_violations)
         print("Episode: ", episode_num + 1, "Reward: ", rewards, "Constraint Violations: ", num_constraint_violations)
+
+        # Add advice from natural language input
+        if (episode_num + 1) % args.advice_frequency == 0:
+            while True:
+                advice = input("Please enter the advice: ")
+                if not advice.strip():
+                    print("End of adding advice, continue training...")
+                    break
+                generated_code = add_advice(advice)
+                print(generated_code)
+                try:
+                    exec(generated_code)
+                    print("Advice added successfully!")
+                except Exception as e:
+                    print(f"Advice added failed with error: {e}")
         episode_num += 1
 
     return episode_reward, constraint_violations
@@ -151,9 +173,15 @@ def run_option_critic(args):
 
 if __name__ == "__main__":
     start_time = time.time()
+    current_time = datetime.now()
+    current_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
+    print("Running Option Critic on Refuel Task with Constraint Library at", current_time)
     args = parser.parse_args()
     episode_reward, constraint_violations = run_option_critic(args)
     end_time = time.time()
+    current_time = datetime.now()
+    current_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
+    print("Finished running Option Critic on Refuel Task with Constraint Library at ", current_time)
     print("Time taken: ", (end_time - start_time)/60.0, "minutes.")
     episode_reward = np.array(episode_reward)
     constraint_violation = np.array(constraint_violations)

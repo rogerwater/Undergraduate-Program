@@ -79,20 +79,21 @@ class PotentialBasedRewardShaping:
         return reward + self.gamma * potential
 
     def add_constraint_automatically(self):
+        print("Adding 4 constraints automatically before training...")
         self.constraint_library.add_constraint((0, 1, "toolbox_position"), "grab_tool_uncover")
         self.constraint_library.add_constraint((0, 2, "toolbox_position"), "grab_tool_unscrew")
         self.constraint_library.add_constraint((0, 3, "toolbox_position"), "grab_tool_insert")
         self.constraint_library.add_constraint((0, 4, "toolbox_position"), "grab_tool_replenish")
 
-        self.constraint_library.add_constraint((1, 1, "refueling_position"), "uncover")
-        self.constraint_library.add_constraint((2, 2, "refueling_position"), "unscrew")
-        self.constraint_library.add_constraint((3, 3, "refueling_position"), "insert")
-        self.constraint_library.add_constraint((4, 4, "refueling_position"), "replenish")
+        # self.constraint_library.add_constraint((1, 1, "refueling_position"), "uncover")
+        # self.constraint_library.add_constraint((2, 2, "refueling_position"), "unscrew")
+        # self.constraint_library.add_constraint((3, 3, "refueling_position"), "insert")
+        # self.constraint_library.add_constraint((4, 4, "refueling_position"), "replenish")
 
-        self.constraint_library.add_constraint((1, 1, "toolbox_position"), "move_to_refueling_position")
-        self.constraint_library.add_constraint((2, 2, "toolbox_position"), "move_to_refueling_position")
-        self.constraint_library.add_constraint((3, 3, "toolbox_position"), "move_to_refueling_position")
-        self.constraint_library.add_constraint((4, 4, "toolbox_position"), "move_to_refueling_position")
+        # self.constraint_library.add_constraint((1, 1, "toolbox_position"), "move_to_refueling_position")
+        # self.constraint_library.add_constraint((2, 2, "toolbox_position"), "move_to_refueling_position")
+        # self.constraint_library.add_constraint((3, 3, "toolbox_position"), "move_to_refueling_position")
+        # self.constraint_library.add_constraint((4, 4, "toolbox_position"), "move_to_refueling_position")
 
         # self.constraint_library.add_constraint((1, 2, "refueling_position"), "move_to_toolbox")
         # self.constraint_library.add_constraint((2, 3, "refueling_position"), "move_to_toolbox")
