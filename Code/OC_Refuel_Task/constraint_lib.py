@@ -85,10 +85,10 @@ class PotentialBasedRewardShaping:
         self.constraint_library.add_constraint((0, 3, "toolbox_position"), "grab_tool_insert")
         self.constraint_library.add_constraint((0, 4, "toolbox_position"), "grab_tool_replenish")
 
-        # self.constraint_library.add_constraint((1, 1, "refueling_position"), "uncover")
-        # self.constraint_library.add_constraint((2, 2, "refueling_position"), "unscrew")
-        # self.constraint_library.add_constraint((3, 3, "refueling_position"), "insert")
-        # self.constraint_library.add_constraint((4, 4, "refueling_position"), "replenish")
+        self.constraint_library.add_constraint((1, 1, "refueling_position"), "uncover")
+        self.constraint_library.add_constraint((2, 2, "refueling_position"), "unscrew")
+        self.constraint_library.add_constraint((3, 3, "refueling_position"), "insert")
+        self.constraint_library.add_constraint((4, 4, "refueling_position"), "replenish")
 
         # self.constraint_library.add_constraint((1, 1, "toolbox_position"), "move_to_refueling_position")
         # self.constraint_library.add_constraint((2, 2, "toolbox_position"), "move_to_refueling_position")

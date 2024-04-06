@@ -37,7 +37,7 @@ parser.add_argument('--cuda', type=bool, default=True, help='Enable CUDA trainin
 parser.add_argument('--seed', type=int, default=0, help='Random seed for numpy, torch, random.')
 parser.add_argument('--logdir', type=str, default='runs', help='Directory for logging statistics')
 parser.add_argument('--exp', type=str, default=None, help='Optional experiment name')
-parser.add_argument('--max_episode', type=int, default=1500, help='Number of maximum episodes')
+parser.add_argument('--max_episode', type=int, default=5000, help='Number of maximum episodes')
 parser.add_argument('--advice_frequency', type=int, default=100, help='Frequency of add advice')
 
 
@@ -153,6 +153,7 @@ def run_option_critic(args):
         print("Episode: ", episode_num + 1, "Reward: ", rewards, "Constraint Violations: ", num_constraint_violations)
 
         # Add advice from natural language input
+        '''
         if (episode_num + 1) % args.advice_frequency == 0:
             while True:
                 advice = input("Please enter the advice: ")
@@ -166,6 +167,7 @@ def run_option_critic(args):
                     print("Advice added successfully!")
                 except Exception as e:
                     print(f"Advice added failed with error: {e}")
+        '''
         episode_num += 1
 
     return episode_reward, constraint_violations
