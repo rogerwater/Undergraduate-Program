@@ -1,0 +1,10 @@
+If the robot grabs the tool uncover at this time, the refueling state is the initial state, and the robot is at the refueling position, the robot should perform the action uncover at this time
+
+ If the robot grabs the tool unscrew at this time, the refueling state is uncovered, and the robot is at the refueling position, the robot should perform the action unscrew at this time
+
+ If the robot grabs the tool insert at this time, the refueling state is unscrewed, and the robot is at the refueling position, the robot should perform the action insert at this time
+
+ If the robot grabs the tool replenish at this time, the refueling state is inserted, and the robot is at the refueling position, the robot should perform the action replenish at this time
+
+
+

@@ -179,13 +179,13 @@ class UncoverEnv():
             self.state[0][0] = self.tool_box_state[0]
             self.state[0][1] = self.tool_box_state[1]
             self.state[0][2] = self.tool_box_state[2]
-            reward = -0.1
+            reward = -0.5
 
         elif action == 'move_to_refueling_position':
             self.state[0][0] = self.refueling_state[0]
             self.state[0][1] = self.refueling_state[1]
             self.state[0][2] = self.refueling_state[2]
-            reward = -0.1
+            reward = -0.5
 
         elif action.startswith('grab_tool_'):
             # 前提条件：机器人在工具箱处，工具在工具箱处，工具未被抓取
@@ -195,7 +195,7 @@ class UncoverEnv():
                     self.state[0][3] == 0 and self.state[1][3] == 0:
                 self.state[0][3] = 1
                 self.state[1][3] = 1
-                reward = -0.1
+                reward = -0.5
 
         elif action.startswith('release_tool_'):
             # 前提条件：机器人在工具箱处，工具在机器人处，工具被抓取
@@ -205,7 +205,7 @@ class UncoverEnv():
                     self.state[0][3] == 1 and self.state[1][3] == 1:
                 self.state[0][3] = 0
                 self.state[1][3] = 0
-                reward = -0.1
+                reward = -0.5
 
         elif action in self.tool_actions:
             # 前提条件：机器人在加注位置，工具在机器人处，工具被抓取, uncover状态为0
@@ -215,7 +215,7 @@ class UncoverEnv():
                     self.state[1][3] == 1 and self.state[0][3] == 1 and \
                     self.state[2][3] == 0:
                 self.state[2][3] = 1
-                reward = 5
+                reward = 10
 
         if self.state[2][3] == 1 and self.state[1][3] == 0 and self.state[0][3] == 0:
             done = True

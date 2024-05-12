@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
 import random
-from net import feudal_networks
+from feudalnet import feudal_networks
 from replay_buffer import replay_buffer
 from model import RefuelingEnv, UncoverEnv
 from matplotlib import pyplot as plt

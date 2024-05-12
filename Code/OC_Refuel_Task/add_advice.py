@@ -20,7 +20,7 @@ def add_advice(advice):
              "There are 2 positions, toolbox_position means the toolbox position, and refueling_position means the refueling position." \
              "Please convert suggestions involving natural language input for the above parameters into python code." \
              "For example, if the input suggestion is: If the robot does not grab the tool at this time, the refueling state is the initial state, and the robot is at the tool box position, the robot should perform the action grab_tool_uncover at this time." \
-             "The corresponding python code should be: pbrs.constraint_library.add_constraint((0, 1, 'toolbox_position'), 'grab_tool_uncover')\\" \
+             "The corresponding python code should be: pbrs.rule_library.add_rule((0, 1, 'toolbox_position'), 'grab_tool_uncover')\\" \
              "Note that you only need to output the corresponding python code"
     # print(prompt)
     advice = advice
@@ -43,4 +43,4 @@ if __name__ == "__main__":
     advice = input("Please enter the advice: ")
     generated_code = add_advice(advice)
     print(generated_code)
-    exec(generated_code)
+    # exec(generated_code)

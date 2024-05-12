@@ -47,27 +47,27 @@ def constraints_library(env, pre_action, cur_action):
     return action
 
 
-class ConstraintLibrary:
+class RuleLibrary:
     def __init__(self):
-        self.constraint_dict = {}
+        self.rule_dict = {}
 
-    def add_constraint(self, info, suggested_action):
-        self.constraint_dict[info] = suggested_action
+    def add_rule(self, info, suggested_action):
+        self.rule_dict[info] = suggested_action
 
     def get_suggested_action(self, info):
-        return self.constraint_dict.get(info, None)
+        return self.rule_dict.get(info, None)
 
 
 class PotentialBasedRewardShaping:
     def __init__(self, gamma, w):
-        self.constraint_library = ConstraintLibrary()
+        self.rule_library = RuleLibrary()
         self.gamma = gamma
         self.w = w
         self.env = RefuelingEnv()
 
     def potential_function(self, info, action):
         # Calculate the potential function
-        suggested_action = self.constraint_library.get_suggested_action(info)
+        suggested_action = self.rule_library.get_suggested_action(info)
         if suggested_action is None:
             return 0.0, False, None
         if action == suggested_action:
@@ -78,32 +78,17 @@ class PotentialBasedRewardShaping:
     def shaped_reward(self, reward, potential):
         return reward + self.gamma * potential
 
-    def add_constraint_automatically(self):
-        print("Adding 4 constraints automatically before training...")
-        self.constraint_library.add_constraint((0, 1, "toolbox_position"), "grab_tool_uncover")
-        self.constraint_library.add_constraint((0, 2, "toolbox_position"), "grab_tool_unscrew")
-        self.constraint_library.add_constraint((0, 3, "toolbox_position"), "grab_tool_insert")
-        self.constraint_library.add_constraint((0, 4, "toolbox_position"), "grab_tool_replenish")
+    def add_rules_automatically(self):
+        print("Adding 4 rules automatically before training...")
+        self.rule_library.add_rule((0, 1, "toolbox_position"), "grab_tool_uncover")
+        self.rule_library.add_rule((0, 2, "toolbox_position"), "grab_tool_unscrew")
+        self.rule_library.add_rule((0, 3, "toolbox_position"), "grab_tool_insert")
+        self.rule_library.add_rule((0, 4, "toolbox_position"), "grab_tool_replenish")
 
-        self.constraint_library.add_constraint((1, 1, "refueling_position"), "uncover")
-        self.constraint_library.add_constraint((2, 2, "refueling_position"), "unscrew")
-        self.constraint_library.add_constraint((3, 3, "refueling_position"), "insert")
-        self.constraint_library.add_constraint((4, 4, "refueling_position"), "replenish")
-
-        # self.constraint_library.add_constraint((1, 1, "toolbox_position"), "move_to_refueling_position")
-        # self.constraint_library.add_constraint((2, 2, "toolbox_position"), "move_to_refueling_position")
-        # self.constraint_library.add_constraint((3, 3, "toolbox_position"), "move_to_refueling_position")
-        # self.constraint_library.add_constraint((4, 4, "toolbox_position"), "move_to_refueling_position")
-
-        # self.constraint_library.add_constraint((1, 2, "refueling_position"), "move_to_toolbox")
-        # self.constraint_library.add_constraint((2, 3, "refueling_position"), "move_to_toolbox")
-        # self.constraint_library.add_constraint((3, 4, "refueling_position"), "move_to_toolbox")
-        # self.constraint_library.add_constraint((4, 5, "refueling_position"), "move_to_toolbox")
-
-        # self.constraint_library.add_constraint((1, 2, "toolbox_position"), "release_tool_uncover")
-        # self.constraint_library.add_constraint((2, 3, "toolbox_position"), "release_tool_unscrew")
-        # self.constraint_library.add_constraint((3, 4, "toolbox_position"), "release_tool_insert")
-        # self.constraint_library.add_constraint((4, 5, "toolbox_position"), "release_tool_replenish")
+        self.rule_library.add_rule((1, 1, "refueling_position"), "uncover")
+        self.rule_library.add_rule((2, 2, "refueling_position"), "unscrew")
+        self.rule_library.add_rule((3, 3, "refueling_position"), "insert")
+        self.rule_library.add_rule((4, 4, "refueling_position"), "replenish")
 
     def get_info_from_state(self, state):
         # get hold_state
