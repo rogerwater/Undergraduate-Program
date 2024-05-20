@@ -78,8 +78,15 @@ class PotentialBasedRewardShaping:
     def shaped_reward(self, reward, potential):
         return reward + self.gamma * potential
 
-    def add_rules_automatically(self):
+    def add_rules_automatically_human(self):
         print("Adding 4 rules automatically before training...")
+        self.rule_library.add_rule((0, 1, "toolbox_position"), "grab_tool_uncover")
+        self.rule_library.add_rule((0, 2, "toolbox_position"), "grab_tool_unscrew")
+        self.rule_library.add_rule((0, 3, "toolbox_position"), "grab_tool_insert")
+        self.rule_library.add_rule((0, 4, "toolbox_position"), "grab_tool_replenish")
+
+    def add_rules_automatically(self):
+        print("Adding 8 rules automatically before training...")
         self.rule_library.add_rule((0, 1, "toolbox_position"), "grab_tool_uncover")
         self.rule_library.add_rule((0, 2, "toolbox_position"), "grab_tool_unscrew")
         self.rule_library.add_rule((0, 3, "toolbox_position"), "grab_tool_insert")

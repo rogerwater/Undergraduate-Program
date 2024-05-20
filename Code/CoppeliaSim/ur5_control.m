@@ -50,7 +50,7 @@ ur5 = SerialLink(L, 'name', 'ur5');
 
 %% UR5机器人轨迹规划
 
-t = 0:0.05:3;
+t = 0:0.05:5;
 % UR5 DH参数
 a = [0, -0.425, -0.39225, 0, 0, 0];
 alpha = [pi/2, 0, 0, pi/2, -pi/2, 0];
@@ -69,18 +69,21 @@ figure(1)
 [y01, y02, y03, y04, y05, y06] = fill_cube(-0.1, -0.1, -0.3, 0.2);
 [y11, y12, y13, y14, y15, y16] = fill_cube2(s_position(1), s_position(2), s_position(3), 0.45);
 [y21, y22, y23, y24, y25, y26] = fill_cube(tool_position(1), tool_position(2), tool_position(3), 0.3);
+rec1 = fill_rec(s_position(1) - 0.7, s_position(2), s_position(3) + 0.25, 0.7, 0.3);
+rec2 = fill_rec(s_position(1) + 0.4, s_position(2), s_position(3) + 0.25, 0.7, 0.3);
+y2 = [];
 hold on
-ur5.plot(qc1, 'trail', 'b-', 'movie', '1.gif');
+ur5.plot(qc1, 'trail', 'b-', 'movie', '1.mp4');
 
 % UR5从工具箱处移动到卫星处
 q2 = [0, pi/2, -pi/4, 0, pi/2, 0];
 qc2 = jtraj(q1, q2, t);
 T2 = ur5.fkine(q2);
-ur5.plot(qc2, 'trail', 'b-', 'movie', '2.gif');
+ur5.plot(qc2, 'trail', 'b-', 'movie', '2.mp4');
 
 % UR5从卫星处移动到工具箱处
 q3 = [-pi/4, -pi/2, pi/4, pi/2, 0, pi/2];
 qc3 = jtraj(q2, q3, t);
-ur5.plot(qc3, 'trail', 'b-', 'movie', '3.gif');
+ur5.plot(qc3, 'trail', 'b-', 'movie', '3.mp4');
 
 

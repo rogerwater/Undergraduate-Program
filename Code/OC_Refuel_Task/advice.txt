@@ -6,5 +6,13 @@ If the robot grabs the tool uncover at this time, the refueling state is the ini
 
  If the robot grabs the tool replenish at this time, the refueling state is inserted, and the robot is at the refueling position, the robot should perform the action replenish at this time
 
+If the robot does not grab the tool at this time, the refueling state is the initial state, and the robot is at the tool box position, the robot should perform the action grab_tool_uncover at this time
+
+If the robot does not grab the tool at this time, the refueling state is the uncovered state, and the robot is at the tool box position, the robot should perform the action grab_tool_unscrew at this time
+
+If the robot does not grab the tool at this time, the refueling state is the unscrewed state, and the robot is at the tool box position, the robot should perform the action grab_tool_insert at this time
+
+If the robot does not grab the tool at this time, the refueling state is the inserted state, and the robot is at the tool box position, the robot should perform the action grab_tool_replenish at this time
+
 
 
