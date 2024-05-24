@@ -11,7 +11,6 @@ from actor_critic import ActorCriticFeatures
 
 from experience_replay import ReplayBuffer
 from utils import to_tensor
-from logger import Logger
 
 import time
 import gym
@@ -93,7 +92,6 @@ def run_option_critic(args):
                 curr_op_len = 0
 
             action, logp, entropy = option_critic.get_action(state, current_option)
-
             next_obs, reward, done, _ = env.step(action)
 
             env.render()
@@ -179,11 +177,11 @@ def run_actor_critic(args):
 if __name__ == "__main__":
     args = parser.parse_args()
     episode_reward_oc = run_option_critic(args)
-    episode_reward_ac = run_actor_critic(args)
+    # episode_reward_ac = run_actor_critic(args)
     episode_reward_oc = np.array(episode_reward_oc)
-    episode_reward_ac = np.array(episode_reward_ac)
+    # episode_reward_ac = np.array(episode_reward_ac)
 
-    np.save('episode_reward_oc_cartpole.npy', episode_reward_oc)
-    np.save('episode_reward_ac_cartpole.npy', episode_reward_ac)
+    np.save('../OC_Refuel_Task/episode_reward_oc_cartpole.npy', episode_reward_oc)
+    # np.save('episode_reward_ac_cartpole.npy', episode_reward_ac)
 
 

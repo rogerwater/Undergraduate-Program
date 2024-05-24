@@ -188,7 +188,7 @@ parser.add_argument('--cuda', type=bool, default=True, help='Enable CUDA trainin
 parser.add_argument('--seed', type=int, default=0, help='Random seed for numpy, torch, random.')
 parser.add_argument('--logdir', type=str, default='runs', help='Directory for logging statistics')
 parser.add_argument('--exp', type=str, default=None, help='Optional experiment name')
-parser.add_argument('--max_episode', type=int, default=600, help='Number of maximum episodes')
+parser.add_argument('--max_episode', type=int, default=1000, help='Number of maximum episodes')
 
 
 def run_option_critic(args):
@@ -290,7 +290,7 @@ if __name__ == '__main__':
         env=env,
         capacity=30,
         update_freq=30,
-        episode=600,
+        episode=1000,
         feature_dim=128,
         k_dim=8,
         dilation=10,
@@ -301,15 +301,9 @@ if __name__ == '__main__':
         entropy_weight=1e-4,
         render=False
     )
-    feudalnet_reward = test.run()
+    # feudalnet_reward = test.run()
     option_critic_reward = run_option_critic(args)
-    feudalnet_reward = np.array(feudalnet_reward)
+    # feudalnet_reward = np.array(feudalnet_reward)
     option_critic_reward = np.array(option_critic_reward)
 
-    plt.plot(feudalnet_reward, label='Feudal Networks')
-    plt.plot(option_critic_reward, label='Option Critic')
-    plt.xlabel("Episodes")
-    plt.ylabel("Total Reward")
-    plt.title("Performance on CartPole")
-    plt.legend()
-    plt.show()
+    np.save('episode_reward_oc_cartpole.npy', option_critic_reward)

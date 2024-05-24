@@ -169,14 +169,14 @@ class feudal_model(object):
 
 
 if __name__ == "__main__":
-    env = RefuelingEnv()
-    # env = UncoverEnv()
+    # env = RefuelingEnv()
+    env = UncoverEnv()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = feudal_model(
         env=env,
         capacity=100,
         update_freq=100,
-        episode=4000,
+        episode=1000,
         feature_dim=64,
         k_dim=4,
         dilation=5,
@@ -188,4 +188,6 @@ if __name__ == "__main__":
         device=device
     )
     episode_reward = model.run()
+    episode_reward = np.array(episode_reward)
+    np.save('../OC_Refuel_Task/episode_reward_fn_uncover.npy', episode_reward)
 
