@@ -44,7 +44,7 @@ parser.add_argument('--cuda', type=bool, default=True, help='Enable CUDA trainin
 parser.add_argument('--seed', type=int, default=0, help='Random seed for numpy, torch, random.')
 parser.add_argument('--logdir', type=str, default='runs', help='Directory for logging statistics')
 parser.add_argument('--exp', type=str, default=None, help='Optional experiment name')
-parser.add_argument('--max_episode', type=int, default=4000, help='Number of maximum episodes')
+parser.add_argument('--max_episode', type=int, default=1000, help='Number of maximum episodes')
 parser.add_argument('--advice_frequency', type=int, default=100, help='Frequency of add advice')
 
 
@@ -293,7 +293,8 @@ def run_option_critic(args):
 
 
 def run_option_critic_basic(args):
-    env = RefuelingEnv()
+    # env = RefuelingEnv()
+    env = UncoverEnv()
 
     option_critic = OptionCriticFeatures
     device = torch.device('cuda' if torch.cuda.is_available() and args.cuda else 'cpu')
@@ -400,9 +401,10 @@ if __name__ == "__main__":
     current_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
     print("Running Option Critic on Refuel Task at", current_time)
     args = parser.parse_args()
-    episode_reward_human, action_sequence_human = run_option_critic_human(args)
-    episode_reward, action_sequence = run_option_critic(args)
-    episode_reward_basic, action_sequence_basic = run_option_critic_basic(args)
+    # episode_reward_human, action_sequence_human = run_option_critic_human(args)
+    # episode_reward, action_sequence = run_option_critic(args)
+    # episode_reward_basic, action_sequence_basic = run_option_critic_basic(args)
+    episode_reward_oc_uncover, _ = run_option_critic_basic(args)
     '''
     model = feudal_model(
         env=env,
@@ -436,44 +438,16 @@ if __name__ == "__main__":
         i = i + 1
     '''
 
-    episode_reward = np.array(episode_reward)
-    episode_reward_basic = np.array(episode_reward_basic)
-    episode_reward_human = np.array(episode_reward_human)
-    np.save('episode_reward.npy', episode_reward)
-    np.save('episode_reward_basic.npy', episode_reward_basic)
-    np.save('episode_reward_human.npy', episode_reward_human)
+    # episode_reward = np.array(episode_reward)
+    # episode_reward_basic = np.array(episode_reward_basic)
+    # episode_reward_human = np.array(episode_reward_human)
+    # np.save('episode_reward.npy', episode_reward)
+    # np.save('episode_reward_basic.npy', episode_reward_basic)
+    # np.save('episode_reward_human.npy', episode_reward_human)
 
     # episode_reward_feudal = np.array(episode_reward_feudal)
 
-    '''
-    plt.figure(1)
-    #plt.plot(episode_reward_human, label='option critic with human advice')
-    plt.plot(episode_reward, label='基于规则库的选项-评论家方法')
-    plt.plot(episode_reward_basic, label='原始的选项-评论家方法')
-    # plt.plot(episode_reward_feudal, label='feudal networks')
-    plt.xlabel("回合")
-    plt.ylabel("奖励值")
-    plt.title("在轨加注操作任务规划方法的性能表现")
-    plt.legend()
-    plt.show()
-
-    plt.figure(2)
-    plt.plot(episode_reward, label='基于规则库的选项-评论家方法')
-    plt.xlabel("回合")
-    plt.ylabel("奖励值")
-    plt.title("在轨加注操作任务规划方法的性能表现")
-    plt.legend()
-    plt.show()
-
-    plt.figure(3)
-    plt.plot(episode_reward, label='基于规则库的选项-评论家方法')
-    plt.plot(episode_reward_basic, label='原始的选项-评论家方法')
-    plt.plot(episode_reward_human, label='人机协同高效任务规划方法')
-    plt.xlabel("回合")
-    plt.ylabel("奖励值")
-    plt.title("在轨加注操作任务规划方法的性能表现")
-    plt.legend()
-    plt.show()
-    '''
+    episode_reward_oc_uncover = np.array(episode_reward_oc_uncover)
+    np.save('episode_reward_oc_uncover.npy', episode_reward_oc_uncover)
 
 
