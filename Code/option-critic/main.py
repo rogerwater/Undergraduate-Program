@@ -40,7 +40,7 @@ parser.add_argument('--cuda', type=bool, default=True, help='Enable CUDA trainin
 parser.add_argument('--seed', type=int, default=0, help='Random seed for numpy, torch, random.')
 parser.add_argument('--logdir', type=str, default='runs', help='Directory for logging statistics')
 parser.add_argument('--exp', type=str, default=None, help='Optional experiment name')
-parser.add_argument('--max_episode', type=int, default=600, help='Number of maximum episodes')
+parser.add_argument('--max_episode', type=int, default=1000, help='Number of maximum episodes')
 
 
 def run_option_critic(args):
@@ -66,11 +66,8 @@ def run_option_critic(args):
 
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
-    env.seed(args.seed)
 
     buffer = ReplayBuffer(capacity=args.max_history, seed=args.seed)
-    logger = Logger(logdir=args.logdir,
-                    run_name=f"{OptionCriticFeatures.__name__}-{args.env}-{args.exp}-{time.ctime()}")
 
     steps = 0
     episode_num = 0
@@ -132,7 +129,6 @@ def run_option_critic(args):
 
         episode_reward.append(rewards)
         episode_num += 1
-        logger.log_episode(rewards, option_lengths, ep_steps, epsilon)
 
     env.close()
 
@@ -155,7 +151,6 @@ def run_actor_critic(args):
 
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
-    env.seed(args.seed)
 
     episode_reward = []
     episode_num = 0
@@ -188,13 +183,7 @@ if __name__ == "__main__":
     episode_reward_oc = np.array(episode_reward_oc)
     episode_reward_ac = np.array(episode_reward_ac)
 
-    plt.plot(episode_reward_oc, label='option-critic')
-    plt.fill_between(range(len(episode_reward_oc)), episode_reward_oc - 10, episode_reward_oc + 10, alpha=0.5)
-    plt.plot(episode_reward_ac, label='actor-critic')
-    plt.fill_between(range(len(episode_reward_ac)), episode_reward_ac - 10, episode_reward_ac + 10, alpha=0.5)
-    plt.xlabel("Episodes")
-    plt.ylabel("Total Reward")
-    plt.title("Performance on CartPole")
-    plt.legend()
-    plt.show()
+    np.save('episode_reward_oc_cartpole.npy', episode_reward_oc)
+    np.save('episode_reward_ac_cartpole.npy', episode_reward_ac)
+
 
