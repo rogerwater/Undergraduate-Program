@@ -44,8 +44,8 @@ parser.add_argument('--cuda', type=bool, default=True, help='Enable CUDA trainin
 parser.add_argument('--seed', type=int, default=0, help='Random seed for numpy, torch, random.')
 parser.add_argument('--logdir', type=str, default='runs', help='Directory for logging statistics')
 parser.add_argument('--exp', type=str, default=None, help='Optional experiment name')
-parser.add_argument('--max_episode', type=int, default=1000, help='Number of maximum episodes')
-parser.add_argument('--advice_frequency', type=int, default=100, help='Frequency of add advice')
+parser.add_argument('--max_episode', type=int, default=4000, help='Number of maximum episodes')
+parser.add_argument('--advice_frequency', type=int, default=20, help='Frequency of add advice')
 
 
 def run_option_critic_human(args):
@@ -83,6 +83,8 @@ def run_option_critic_human(args):
     episode_reward = []
     rule_violations = []
     action_sequence = []
+    max_reward = -25
+    complete_episode = []
 
     while episode_num < args.max_episode:
         num_rule_violations = 0
@@ -151,12 +153,17 @@ def run_option_critic_human(args):
             curr_op_len += 1
             obs = next_obs
 
+            if done:
+                complete_episode.append(episode_num + 1)
+                if rewards > max_reward:
+                    max_reward = rewards
+
         episode_reward.append(rewards)
         rule_violations.append(num_rule_violations)
         print("Episode: ", episode_num + 1, "Reward: ", rewards, "Rule Violations: ", num_rule_violations)
 
         # Add advice from natural language input
-        if (episode_num + 1) % args.advice_frequency == 0 and episode_num < 200:
+        if (episode_num + 1) % args.advice_frequency == 0 and episode_num < 40:
             while True:
                 advice = input("Please enter the advice: ")
                 if not advice.strip():
@@ -172,7 +179,7 @@ def run_option_critic_human(args):
 
         episode_num += 1
 
-    return episode_reward, action_sequence
+    return episode_reward, complete_episode, max_reward
 
 
 def run_option_critic(args):
@@ -214,6 +221,8 @@ def run_option_critic(args):
     episode_reward = []
     rule_violations = []
     action_sequence = []
+    max_reward = -25
+    complete_episode = []
 
     while episode_num < args.max_episode:
         num_rule_violations = 0
@@ -247,6 +256,7 @@ def run_option_critic(args):
             action = suggested_action if is_violated else action
 
             next_obs, reward, done = env.step(action)
+
             reward = pbrs.shaped_reward(reward, potential)
 
             buffer.push(obs, current_option, reward, next_obs, done)
@@ -283,18 +293,22 @@ def run_option_critic(args):
             curr_op_len += 1
             obs = next_obs
 
+            if done:
+                complete_episode.append(episode_num + 1)
+                if rewards > max_reward:
+                    max_reward = rewards
+
         episode_reward.append(rewards)
         rule_violations.append(num_rule_violations)
         print("Episode: ", episode_num + 1, "Reward: ", rewards, "Rule Violations: ", num_rule_violations)
 
         episode_num += 1
 
-    return episode_reward, action_sequence
+    return episode_reward, complete_episode, max_reward
 
 
 def run_option_critic_basic(args):
-    # env = RefuelingEnv()
-    env = UncoverEnv()
+    env = RefuelingEnv()
 
     option_critic = OptionCriticFeatures
     device = torch.device('cuda' if torch.cuda.is_available() and args.cuda else 'cpu')
@@ -324,6 +338,8 @@ def run_option_critic_basic(args):
     episode_num = 0
     episode_reward = []
     action_sequence = []
+    max_reward = -25
+    complete_episode = []
 
     while episode_num < args.max_episode:
         rewards = 0
@@ -385,69 +401,54 @@ def run_option_critic_basic(args):
             curr_op_len += 1
             obs = next_obs
 
+            if done:
+                complete_episode.append(episode_num + 1)
+                if rewards > max_reward:
+                    max_reward = rewards
+
         episode_reward.append(rewards)
         print("Episode: ", episode_num + 1, "Reward: ", rewards)
 
         episode_num += 1
 
-    return episode_reward, action_sequence
+    return episode_reward, complete_episode, max_reward
 
 
 if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    env = UncoverEnv()
     start_time = time.time()
     current_time = datetime.now()
     current_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
     print("Running Option Critic on Refuel Task at", current_time)
+
     args = parser.parse_args()
     # episode_reward_human, action_sequence_human = run_option_critic_human(args)
     # episode_reward, action_sequence = run_option_critic(args)
     # episode_reward_basic, action_sequence_basic = run_option_critic_basic(args)
-    episode_reward_oc_uncover, _ = run_option_critic_basic(args)
-    '''
-    model = feudal_model(
-        env=env,
-        capacity=100,
-        update_freq=100,
-        episode=1000,
-        feature_dim=64,
-        k_dim=4,
-        dilation=5,
-        horizon_c=5,
-        learning_rate=1e-3,
-        alpha=0.5,
-        gamma=0.99,
-        entropy_weight=1e-4,
-        device=device
-    )
-    episode_reward_feudal = model.run()
-    '''
+    episode_reward, complete_episode, max_reward = run_option_critic_human(args)
+
     end_time = time.time()
     current_time = datetime.now()
     current_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
     print("Finished running Option Critic on Refuel Task at ", current_time)
     print("Time taken: ", (end_time - start_time)/60.0, "minutes.")
 
-    '''
-    print("Using replanning algorithm, we can get the simplest action sequence as follows:")
-    better_action_sequence = replanning(action_sequence)
-    i = 1
-    for action in action_sequence:
-        print("Step", i, ":", action)
-        i = i + 1
-    '''
-
-    # episode_reward = np.array(episode_reward)
+    episode_reward = np.array(episode_reward)
     # episode_reward_basic = np.array(episode_reward_basic)
     # episode_reward_human = np.array(episode_reward_human)
-    # np.save('episode_reward.npy', episode_reward)
+    np.save('episode_reward_human_new.npy', episode_reward)
+    print('complete episode:', complete_episode)
+    print('max_reward:', max_reward)
     # np.save('episode_reward_basic.npy', episode_reward_basic)
     # np.save('episode_reward_human.npy', episode_reward_human)
 
-    # episode_reward_feudal = np.array(episode_reward_feudal)
-
-    episode_reward_oc_uncover = np.array(episode_reward_oc_uncover)
-    np.save('episode_reward_oc_uncover.npy', episode_reward_oc_uncover)
+    '''
+        print("Using replanning algorithm, we can get the simplest action sequence as follows:")
+        better_action_sequence = replanning(action_sequence)
+        i = 1
+        for action in action_sequence:
+            print("Step", i, ":", action)
+            i = i + 1
+        '''
 
 
